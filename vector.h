@@ -15,12 +15,7 @@ typedef struct vector vector;
 */
 vector * vector_new(void);
 
-/**
- Zwraca zawartość vectora.
- @param[in] vec Vector.
- @return Zawartość vectora vec
-*/
-void * vector_content(const vector *vec);
+char * vector_to_string(vector *vec);
 
 /**
  Usuwa vector
@@ -40,7 +35,7 @@ int vector_size(const vector *vec);
  @param[in] vec Vector.
  @param[in] element Element, który chcemy wstawić.
 */
-void vector_push_back(vector *vec, const void *element);
+void vector_push_back(vector *vec, const void * element);
 
 void vector_pop_front(vector *vec);
 
@@ -53,7 +48,7 @@ void vector_pop_back(vector *vec);
  @param[in] element Element, który chcemy wstawić.
  @param[in] index Indeks, w ktorym chcemy wstawić.
 */
-void vector_insert(vector *vec, const void *element, int index);
+void vector_insert(vector *vec, const void * element, int index);
 
 /**
  Usuwa element vectora.
@@ -62,10 +57,20 @@ void vector_insert(vector *vec, const void *element, int index);
 */
 void vector_remove(vector *vec, const int index);
 
+void vector_debug(vector *vec);
+
 /**
  Czyści vector (tj. usuwa wszystkie elementy, bez niszczenia vectora)
  @param vec Vector.
  */
 void vector_clear(vector *vec);
+
+char vector_get(vector *vec, int index);
+
+int vector_empty(vector *vec);
+
+char vector_front(vector *vec);
+
+char vector_back(vector *vec);
 
 #endif /* VECTOR_H */
