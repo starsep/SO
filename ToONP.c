@@ -11,9 +11,6 @@
 
 #define INF 1000000000
 #define SPLIT '|'
-#define DEBUG if(debug)
-
-const int debug = 0;
 
 int operator_priority(char op) {
 	switch(op) {
@@ -80,11 +77,6 @@ void get_data(vector **input, vector **stack, vector **output, int from) {
 	int bytes_read;
 	int splits = 0;
 	while(splits < 3 && (bytes_read = read(from, buffer, size)) > 0) {
-		DEBUG {
-			fprintf(stderr, "Read %d bytes\n", bytes_read);
-			buffer[bytes_read] = '\0';
-			fprintf(stderr, "%s\n", buffer);
-		}
 		for(int i = 0; i < bytes_read; i++) {
 			if(buffer[i] == SPLIT) {
 				splits++;
@@ -96,14 +88,6 @@ void get_data(vector **input, vector **stack, vector **output, int from) {
 	}
 	remove_whitespace(*input);
 	free(buffer);
-	DEBUG {
-		fprintf(stderr, "Input: ");
-		vector_debug(*input);
-		fprintf(stderr, "Stack: ");
-		vector_debug(*stack);
-		fprintf(stderr, "Output: ");
-		vector_debug(*output);
-	}
 }
 
 void stack_to_output(vector *stack, vector *output) {
@@ -190,11 +174,6 @@ void get_output(vector **output, int from) {
 	vector *good_output = vector_new();
 	int split = 0;
 	while(!split && (bytes_read = read(from, buffer, size)) > 0) {
-		DEBUG {
-			fprintf(stderr, "Read %d bytes\n", bytes_read);
-			buffer[bytes_read] = '\0';
-			fprintf(stderr, "%s\n", buffer);
-		}
 		for(int i = 0; i < bytes_read; i++) {
 			if(buffer[i] == SPLIT) {
 				split = 1;
@@ -205,25 +184,14 @@ void get_output(vector **output, int from) {
 			}
 		}
 	}
-	DEBUG {
-		fprintf(stderr, "Got: ");
-		vector_debug(good_output);
-	}
 	free(buffer);
 	*output = good_output;
 }
 
 void w(int id, int in, int out) {
-	DEBUG {
-		fprintf(stderr, "--Process %d started (IN = %d, OUT = %d) --\n", id, in, out);
-	}
 	vector *input, *stack, *output;
 	get_data(&input, &stack, &output, in);
 	if(!do_your_job(input, stack, output)) {
-		DEBUG {
-			fprintf(stderr, "My output: ");
-			vector_debug(output);
-		}
 		stream_vector(output, out);
 	}
 	else {
@@ -254,9 +222,6 @@ void w(int id, int in, int out) {
 }
 
 void ToONP(char *input) {
-	DEBUG {
-		fprintf(stderr, "==ToONP started==\n");
-	}
 	int n = strlen(input);
 	if(n == 0) {
 		fprintf(stderr, "ToONP: Empty input\n");
