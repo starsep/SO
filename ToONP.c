@@ -70,6 +70,7 @@ void remove_whitespace(vector *input) {
 }
 
 ///pobiera dane z pipe'a from, zapisuje do vectorów input, stack i output
+///dane są w formacie inputSPLITstackSPLIToutputSPLIT
 void get_data(vector **input, vector **stack, vector **output, int from) {
 	*input = vector_new();
 	*stack = vector_new();
@@ -112,6 +113,8 @@ int do_your_job(vector *input, vector *stack, vector *output) {
 		return 0;
 	}
 	static char tmp[] = "x ";
+	//jeżeli na wejściu mamy liczbę albo zmienną
+	//to przesyłamy ją na output
 	if(isdigit(vector_front(input)) || isalpha(vector_front(input))) {
 		vector_push_back(output, tmp + 1);
 		while(!vector_empty(input) && !isspace(vector_front(input))) {
