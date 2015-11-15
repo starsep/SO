@@ -12,7 +12,7 @@
 
 #define INF 1000000000
 #define SPLIT '|'
-#define TRY(x) if((x) == -1) { perror(#x); }		
+#define TRY(x) if((x) == -1) { perror(#x); _exit(1); }		
 
 ///dla operatora zwraca jego priorytet
 int operator_priority(char op) {
@@ -108,68 +108,78 @@ void stack_to_output(vector *stack, vector *output) {
 	}
 }
 
+//jeżeli na wejściu mamy liczbę albo zmienną
+//to przesyłamy ją na output
+void digit_or_variable_case(vector *input, vector *output) {
+	static char tmp[] = "x ";
+	vector_push_back(output, tmp + 1);
+	while(!vector_empty(input) && !isspace(vector_front(input))) {
+		tmp[0] = vector_front(input);
+		vector_pop_front(input);
+		vector_push_back(output, tmp);
+	}
+}
+
+//na wejściu jest operator
+void operator_case(vector *input, vector *stack, vector *output) {
+	static char tmp[] = "x ";
+	tmp[0] = vector_front(input);
+	vector_pop_front(input);
+	switch(tmp[0]) {
+		case '(':
+			vector_push_back(stack, tmp);
+			break;
+		case ')':
+			while(!vector_empty(stack)) {
+				tmp[0] = vector_back(stack);
+				vector_pop_back(stack);
+				if(tmp[0] == '(') {
+					break;
+				}
+				vector_push_back(output, tmp + 1);
+				vector_push_back(output, tmp);
+			}
+			break;
+		default:
+			if(vector_empty(stack)) {
+				vector_push_back(stack, tmp);
+			}
+			else {
+				static char top[] = "x ";
+				top[0] = vector_back(stack);
+				if(operator_priority(tmp[0]) > operator_priority(top[0])) {
+					vector_push_back(stack, tmp);
+				}
+				else {
+					while(!vector_empty(stack)) {
+					top[0] = vector_back(stack);
+						if(operator_priority(tmp[0]) <= operator_priority(top[0])) {
+							vector_push_back(output, top + 1);
+							vector_push_back(output, top);
+							vector_pop_back(stack);
+						}
+						else {
+							break;
+						}
+					}
+					vector_push_back(stack, tmp);
+				}
+			}
+			break;
+	}
+}
+
 ///jeden krok algorytmu
 int do_your_job(vector *input, vector *stack, vector *output) {
 	if(vector_empty(input)) {
 		stack_to_output(stack, output);
 		return 0;
 	}
-	static char tmp[] = "x ";
-	//jeżeli na wejściu mamy liczbę albo zmienną
-	//to przesyłamy ją na output
 	if(isdigit(vector_front(input)) || isalpha(vector_front(input))) {
-		vector_push_back(output, tmp + 1);
-		while(!vector_empty(input) && !isspace(vector_front(input))) {
-			tmp[0] = vector_front(input);
-			vector_pop_front(input);
-			vector_push_back(output, tmp);
-		}
+		digit_or_variable_case(input, output);
 	}
 	else { //operator
-		tmp[0] = vector_front(input);
-		vector_pop_front(input);
-		switch(tmp[0]) {
-			case '(':
-				vector_push_back(stack, tmp);
-				break;
-			case ')':
-				while(!vector_empty(stack)) {
-					tmp[0] = vector_back(stack);
-					vector_pop_back(stack);
-					if(tmp[0] == '(') {
-						break;
-					}
-					vector_push_back(output, tmp + 1);
-					vector_push_back(output, tmp);
-				}
-				break;
-			default:
-				if(vector_empty(stack)) {
-					vector_push_back(stack, tmp);
-				}
-				else {
-					static char top[] = "x ";
-					top[0] = vector_back(stack);
-					if(operator_priority(tmp[0]) > operator_priority(top[0])) {
-						vector_push_back(stack, tmp);
-					}
-					else {
-						while(!vector_empty(stack)) {
-							top[0] = vector_back(stack);
-							if(operator_priority(tmp[0]) <= operator_priority(top[0])) {
-								vector_push_back(output, top + 1);
-								vector_push_back(output, top);
-								vector_pop_back(stack);
-							}
-							else {
-								break;
-							}
-						}
-						vector_push_back(stack, tmp);
-					}
-				}
-				break;
-		}
+		operator_case(input, stack, output);
 	}
 	remove_whitespace(input);
 	if(vector_empty(input)) {
@@ -211,7 +221,7 @@ void w(int id, int in, int out) {
 		int fds[2];
 		TRY(pipe(fds));
 		pid_t pid;
-		TRY((pid = fork()));
+		TRY(pid = fork());
 		if(pid == 0) { //child
 			w(id + 1, fds[0], fds[1]);
 		}
@@ -245,7 +255,7 @@ void ToONP(char *input) {
 	int fds[2];
 	TRY(pipe(fds));
 	pid_t pid;
-	TRY((pid = fork()));
+	TRY(pid = fork());
 	if(pid == 0) { //child
 		w(1, fds[0], fds[1]);
 	}
