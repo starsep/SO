@@ -11,12 +11,9 @@
 
 #define INF 1000000000
 #define SPLIT '|'
-#define STDIN 0
-#define STDOUT 1
-#define STDERR 2
 #define DEBUG if(debug)
 
-int debug = 0;
+const int debug = 0;
 
 int operator_priority(char op) {
 	switch(op) {
@@ -80,15 +77,15 @@ void get_data(vector **input, vector **stack, vector **output, int from) {
 	vector *vectors[3] = { *input, *stack, *output };
 	size_t size = 100;
 	char *buffer = malloc(size);
-	int read_bytes;
+	int bytes_read;
 	int splits = 0;
-	while(splits < 3 && (read_bytes = read(from, buffer, size)) > 0) {
+	while(splits < 3 && (bytes_read = read(from, buffer, size)) > 0) {
 		DEBUG {
-			fprintf(stderr, "Read %d bytes\n", read_bytes);
-			buffer[read_bytes] = '\0';
+			fprintf(stderr, "Read %d bytes\n", bytes_read);
+			buffer[bytes_read] = '\0';
 			fprintf(stderr, "%s\n", buffer);
 		}
-		for(int i = 0; i < read_bytes; i++) {
+		for(int i = 0; i < bytes_read; i++) {
 			if(buffer[i] == SPLIT) {
 				splits++;
 			}
@@ -186,17 +183,48 @@ int do_your_job(vector *input, vector *stack, vector *output) {
 	return !vector_empty(input);
 }
 
+void get_output(vector **output, int from) {
+	const size_t size = 100;
+	char *buffer = malloc(size);
+	int bytes_read;
+	vector *good_output = vector_new();
+	int split = 0;
+	while(!split && (bytes_read = read(from, buffer, size)) > 0) {
+		DEBUG {
+			fprintf(stderr, "Read %d bytes\n", bytes_read);
+			buffer[bytes_read] = '\0';
+			fprintf(stderr, "%s\n", buffer);
+		}
+		for(int i = 0; i < bytes_read; i++) {
+			if(buffer[i] == SPLIT) {
+				split = 1;
+				break;
+			}
+			else {
+				vector_push_back(good_output, buffer + i);
+			}
+		}
+	}
+	DEBUG {
+		fprintf(stderr, "Got: ");
+		vector_debug(good_output);
+	}
+	free(buffer);
+	*output = good_output;
+}
+
 void w(int id, int in, int out) {
 	DEBUG {
-		fprintf(stderr, "--Process %d started--\n", id);
+		fprintf(stderr, "--Process %d started (IN = %d, OUT = %d) --\n", id, in, out);
 	}
 	vector *input, *stack, *output;
 	get_data(&input, &stack, &output, in);
 	if(!do_your_job(input, stack, output)) {
-		//DEBUG {
+		DEBUG {
 			fprintf(stderr, "My output: ");
 			vector_debug(output);
-		//}
+		}
+		stream_vector(output, out);
 	}
 	else {
 		int fds[2];
@@ -209,8 +237,16 @@ void w(int id, int in, int out) {
 			stream_vector(input, fds[1]);
 			stream_vector(stack, fds[1]);
 			stream_vector(output, fds[1]);
-			waitpid(pid, NULL, 0);	
+			
+			waitpid(pid, NULL, 0);
+			
+			vector *good_output;
+			get_output(&good_output, fds[0]);
+			stream_vector(good_output, out);
+			vector_done(good_output);
 		}
+		close(fds[0]);
+		close(fds[1]);
 	}
 	vector_done(input);
 	vector_done(stack);
@@ -236,8 +272,18 @@ void ToONP(char *input) {
 		stream(input, fds[1]);
 		stream("", fds[1]);
 		stream("", fds[1]);
+		
 		waitpid(pid, NULL, 0);	
+		
+		vector *good_output;
+		get_output(&good_output, fds[0]);
+		char *final_output = vector_to_string(good_output);
+		printf("%s\n", final_output + 1);
+		vector_done(good_output);
+		free(final_output);
 	}
+	close(fds[0]);
+	close(fds[1]);
 }
 
 int main(int argc, char **argv) {
