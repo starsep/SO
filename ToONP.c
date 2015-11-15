@@ -1,9 +1,12 @@
+//Filip Czaplicki 359081
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string.h>
+#include "vector.h"
 
 #define INF 1000000000
 #define SPLIT '|'
@@ -44,60 +47,74 @@ void check_arguments(int argc, char **argv) {
 	}
 }
 
-void w(int id, int *in, int *out) {
-	int fds[2];
-	pipe(fds);
-	*in = fds[0];
-	*out = fds[1];
-	pid_t pid = fork();
-	if(pid == 0) { //child
-		write(STDERR, "Child\n", 6);
-		write(STDERR, "Child2\n", 7);
-		w(id + 1, in, out);
-		_exit(0);
+void clean_up(vector *input, vector *stack, vector *output) {
+	vector_done(input);
+	vector_done(stack);
+	vector_done(output);
+}
+
+void get_data(vector **input, vector **stack, vector **output, int from) {
+	*input = vector_new();
+	*stack = vector_new();
+	*output = vector_new();
+	vector *vectors[3] = { *input, *stack, *output };
+	size_t size = 100;
+	char *buffer = malloc(size);
+	int read_bytes;
+	int splits = 0;
+	while(splits < 3 && (read_bytes = read(from, buffer, size)) > 0) {
+		fprintf(stderr, "Read %d bytes\n", read_bytes);
+		buffer[read_bytes] = '\0';
+		fprintf(stderr, "%s\n", buffer);
+		for(int i = 0; i < read_bytes; i++) {
+			if(buffer[i] == SPLIT) {
+				splits++;
+			}
+			else {
+				vector_push_back(vectors[splits], buffer + i);
+			}
+		}
 	}
-	else { //parent
-		for(int i = 0; i < INF/39500; i++);
-		write(STDERR, "Parent\n", 7);
-		write(STDERR, "Parent2\n", 8);
-	}
+	free(buffer);
+}
+
+void w(int id, int in, int out) {
+	fprintf(stderr, "Process %d started\n", id);
+	vector *input, *stack, *output;
+	get_data(&input, &stack, &output, in);
+	clean_up(input, stack, output);
 }
 
 
 void stream(char *input, char *stack, char *output, int out) {
-	int input_length = strlen(input);
-	int stack_length = strlen(stack);
-	int output_length = strlen(output);
-	int length = input_length + stack_length + output_length + 3;
-	char *merged = (char *) malloc(length * sizeof(char));
-	for(int i = 0; i < input_length; i++) {
-		merged[i] = input[i];
-	}
-	merged[input_length] = SPLIT;
-	for(int i = 0; i < stack_length; i++) {
-		merged[i + input_length + 1] = stack[i];
-	}
-	merged[input_length + 1 + stack_length] = SPLIT;
-	for(int i = 0; i < output_length; i++) {
-		merged[i + input_length + stack_length + 2] = output[i];
-	}
-	merged[length - 1] = SPLIT;
-	write(out, merged, length);
-	free(merged);
+	char split[] = "x";
+	split[0] = SPLIT;
+	write(out, input, strlen(input));
+	write(out, split, 1);
+	write(out, stack, strlen(stack));
+	write(out, split, 1);
+	write(out, output, strlen(output));
+	write(out, split, 1);
 }
 
 void ToONP(char *input) {
+	fprintf(stderr, "ToONP started\n");
 	int n = strlen(input);
-	//fprintf(stderr, "%d\n", n);
 	if(n == 0) {
 		fprintf(stderr, "ToONP: Empty input\n");
 		return;
 	}
-	int in, out;
-	w(0, &in, &out);
-	stream(input, input, input, out);
-	wait(NULL);
-	printf("%d %d\n", in, out);
+	int fds[2];
+	pipe(fds);
+	pid_t id = fork();
+	if(id == 0) { //child
+		w(1, fds[0], fds[1]);
+	}
+	else {
+		stream(input, "", "", fds[1]);
+		waitpid(id, NULL, 0);	
+	}
+	//stream(input, input, input, out);
 }
 
 int main(int argc, char **argv) {

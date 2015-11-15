@@ -1,3 +1,5 @@
+//Filip Czaplicki 359081
+
 #ifndef VECTOR_H
 #define VECTOR_H
 
@@ -9,11 +11,9 @@ typedef struct vector vector;
 
 /**
  Tworzy nowy vector, potem należy zwolnić vector za pomocą vector_done.
- @param[in] size_of_element Liczba bajtów na element.
- @param[in] start_size Wielkość wektora na początku.
  @return Nowy vector
 */
-vector * vector_new(const int size_of_element, const int start_size);
+vector * vector_new(void);
 
 /**
  Zwraca zawartość vectora.
@@ -41,6 +41,10 @@ int vector_size(const vector *vec);
  @param[in] element Element, który chcemy wstawić.
 */
 void vector_push_back(vector *vec, const void *element);
+
+void vector_pop_front(vector *vec);
+
+void vector_pop_back(vector *vec);
 
 /**
  Dodaje element do vectora na danym indeksie.
