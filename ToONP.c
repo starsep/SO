@@ -7,10 +7,12 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 #include "vector.h"
 
 #define INF 1000000000
 #define SPLIT '|'
+#define TRY(x) if((x) == -1) { perror(#x); }		
 
 ///dla operatora zwraca jego priorytet
 int operator_priority(char op) {
@@ -51,8 +53,8 @@ void check_arguments(int argc, char **argv) {
 void stream(char *what, int out) {
 	static char split[] = "x";
 	split[0] = SPLIT;
-	write(out, what, strlen(what));
-	write(out, split, 1);
+	TRY(write(out, what, strlen(what)));
+	TRY(write(out, split, 1));
 }
 
 ///robi stream vectora what
@@ -207,8 +209,9 @@ void w(int id, int in, int out) {
 	}
 	else {
 		int fds[2];
-		pipe(fds);
-		pid_t pid = fork();
+		TRY(pipe(fds));
+		pid_t pid;
+		TRY((pid = fork()));
 		if(pid == 0) { //child
 			w(id + 1, fds[0], fds[1]);
 		}
@@ -217,15 +220,15 @@ void w(int id, int in, int out) {
 			stream_vector(stack, fds[1]);
 			stream_vector(output, fds[1]);
 			
-			waitpid(pid, NULL, 0);
+			TRY(waitpid(pid, NULL, 0));
 			
 			vector *good_output;
 			get_output(&good_output, fds[0]);
 			stream_vector(good_output, out);
 			vector_done(good_output);
 		}
-		close(fds[0]);
-		close(fds[1]);
+		TRY(close(fds[0]));
+		TRY(close(fds[1]));
 	}
 	vector_done(input);
 	vector_done(stack);
@@ -240,8 +243,9 @@ void ToONP(char *input) {
 		return;
 	}
 	int fds[2];
-	pipe(fds);
-	pid_t pid = fork();
+	TRY(pipe(fds));
+	pid_t pid;
+	TRY((pid = fork()));
 	if(pid == 0) { //child
 		w(1, fds[0], fds[1]);
 	}
@@ -250,7 +254,7 @@ void ToONP(char *input) {
 		stream("", fds[1]);
 		stream("", fds[1]);
 		
-		waitpid(pid, NULL, 0);	
+		TRY(waitpid(pid, NULL, 0));	
 		
 		vector *good_output;
 		get_output(&good_output, fds[0]);
@@ -259,8 +263,8 @@ void ToONP(char *input) {
 		vector_done(good_output);
 		free(final_output);
 	}
-	close(fds[0]);
-	close(fds[1]);
+	TRY(close(fds[0]));
+	TRY(close(fds[1]));
 }
 
 int main(int argc, char **argv) {
