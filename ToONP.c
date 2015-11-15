@@ -36,13 +36,12 @@ int operator_priority(char op) {
 
 void check_arguments(int argc, char **argv) {
 	if(argc != 2) {
-		fprintf(stderr, "Usage: ./ToONP input\n");
+		fprintf(stderr, "Usage: %s input\n", argv[0]);
 		fprintf(stderr, "Examples:\n");
-		fprintf(stderr, "  ./ToONP \"2 + 3 * x + 15 + 42 * ( 1 + 32 ) / 3\"\n");
-		fprintf(stderr, "  ./ToONP \"e + 42 * ( p - i )\"\n");
+		fprintf(stderr, "  %s \"2 + 3 * x + 15 + 42 * ( 1 + 32 ) / 3\"\n", argv[0]);
+		fprintf(stderr, "  %s \"e + 42 * ( p - i )\"\n", argv[0]);
 		exit(1);
 	}
-	//fprintf(stderr, "%lu %s\n", strlen(argv[1]), argv[1]);
 }
 
 void w(int id, int *in, int *out) {

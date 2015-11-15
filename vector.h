@@ -1,16 +1,5 @@
-/** @file
-	Interfejs vectora
-
-	@ingroup dictionary
-	@author Filip Czaplicki <fc359081@students.mimuw.edu.pl>
-	@copyright Uniwerstet Warszawski
-	@date 2015-05-21
- */
-
-#ifndef __VECTOR_H__
-#define __VECTOR_H__
-
-#include "wchar.h"
+#ifndef VECTOR_H
+#define VECTOR_H
 
 ///Struktura reprezentująca vector tj. dynamiczną tablicę
 struct vector;
@@ -70,17 +59,9 @@ void vector_insert(vector *vec, const void *element, int index);
 void vector_remove(vector *vec, const int index);
 
 /**
- Szuka litery w posortowanym vectorze przechowującym wchar_t.
- @param[in] vec Vector.
- @param[in] c Litera, której szukamy.
- @return Indeks, na którym jest litera c lub -1 jeżeli nie znaleziono
-*/
-int vector_sorted_find_wchar_t(vector *vec, const wchar_t c);
-
-/**
  Czyści vector (tj. usuwa wszystkie elementy, bez niszczenia vectora)
  @param vec Vector.
  */
 void vector_clear(vector *vec);
 
-#endif /* __VECTOR_H__ */
+#endif /* VECTOR_H */
