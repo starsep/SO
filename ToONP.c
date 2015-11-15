@@ -12,6 +12,7 @@
 #define INF 1000000000
 #define SPLIT '|'
 
+///dla operatora zwraca jego priorytet
 int operator_priority(char op) {
 	switch(op) {
 		case '(':
@@ -35,6 +36,7 @@ int operator_priority(char op) {
 	}
 }
 
+///sprawdza poprawność argumentów
 void check_arguments(int argc, char **argv) {
 	if(argc != 2) {
 		fprintf(stderr, "Usage: %s input\n", argv[0]);
@@ -45,6 +47,7 @@ void check_arguments(int argc, char **argv) {
 	}
 }
 
+///wysyła c-string what do pipe'a out
 void stream(char *what, int out) {
 	static char split[] = "x";
 	split[0] = SPLIT;
@@ -52,20 +55,21 @@ void stream(char *what, int out) {
 	write(out, split, 1);
 }
 
-
+///robi stream vectora what
 void stream_vector(vector *what, int out) {
 	char *string = vector_to_string(what);
 	stream(string, out);
 	free(string);
 }
 
-
+///usuwa whitespace z początku vectora input
 void remove_whitespace(vector *input) {
 	while(!vector_empty(input) && isspace(vector_front(input))) {
 		vector_pop_front(input);
 	}
 }
 
+///pobiera dane z pipe'a from, zapisuje do vectorów input, stack i output
 void get_data(vector **input, vector **stack, vector **output, int from) {
 	*input = vector_new();
 	*stack = vector_new();
@@ -90,6 +94,7 @@ void get_data(vector **input, vector **stack, vector **output, int from) {
 	free(buffer);
 }
 
+///przesyła cały stos na wyjście
 void stack_to_output(vector *stack, vector *output) {
 	static char tmp[] = "x ";
 	while(!vector_empty(stack)) {
@@ -100,6 +105,7 @@ void stack_to_output(vector *stack, vector *output) {
 	}
 }
 
+///jeden krok algorytmu
 int do_your_job(vector *input, vector *stack, vector *output) {
 	if(vector_empty(input)) {
 		stack_to_output(stack, output);
@@ -167,6 +173,7 @@ int do_your_job(vector *input, vector *stack, vector *output) {
 	return !vector_empty(input);
 }
 
+///zapisuje w output wynik konwersji z pipe'a from
 void get_output(vector **output, int from) {
 	const size_t size = 100;
 	char *buffer = malloc(size);
@@ -188,6 +195,7 @@ void get_output(vector **output, int from) {
 	*output = good_output;
 }
 
+///funkcja sterująca tworzenie wątków
 void w(int id, int in, int out) {
 	vector *input, *stack, *output;
 	get_data(&input, &stack, &output, in);
@@ -221,6 +229,7 @@ void w(int id, int in, int out) {
 	vector_done(output);
 }
 
+///główna funkcja ToONP
 void ToONP(char *input) {
 	int n = strlen(input);
 	if(n == 0) {
