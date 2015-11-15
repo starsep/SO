@@ -1,6 +1,6 @@
 #Filip Czaplicki 359081
 
-CFLAGS=-std=gnu99 -pedantic -Wall -Wshadow -Wextra
+CFLAGS=-std=gnu99 -pedantic -Wall -Wshadow -Wextra -Wunused
 COMPILER=gcc
 
 all: ToONP

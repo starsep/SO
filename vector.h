@@ -15,6 +15,7 @@ typedef struct vector vector;
 */
 vector * vector_new(void);
 
+///Zamienia vector charów na c-string
 char * vector_to_string(vector *vec);
 
 /**
@@ -37,8 +38,10 @@ int vector_size(const vector *vec);
 */
 void vector_push_back(vector *vec, const void * element);
 
+///Usuwa element z początku
 void vector_pop_front(vector *vec);
 
+///Usuwa element z końca
 void vector_pop_back(vector *vec);
 
 /**
@@ -57,6 +60,8 @@ void vector_insert(vector *vec, const void * element, int index);
 */
 void vector_remove(vector *vec, const int index);
 
+
+///Wypisuje vector (charów) na stderr
 void vector_debug(vector *vec);
 
 /**
@@ -65,12 +70,16 @@ void vector_debug(vector *vec);
  */
 void vector_clear(vector *vec);
 
+///zwraca char z vector o indeksie = index
 char vector_get(vector *vec, int index);
 
+///czy vector pusty?
 int vector_empty(vector *vec);
 
+///char z początku vectora
 char vector_front(vector *vec);
 
+///char z końca vectora
 char vector_back(vector *vec);
 
 #endif /* VECTOR_H */
