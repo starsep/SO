@@ -1,0 +1,126 @@
+<html>
+<head>
+  <title>Zadanie zaliczeniowe 1</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+</head>
+
+<body>
+<h1>ZADANIE NR 1</h1>
+
+<p>Należy napisać w języku C program <code>ToONP</code> implementujący
+konwersję zadanego wyrażenia arytmetycznego na notację ONP (por. np. <a
+href="https://pl.wikipedia.org/wiki/Odwrotna_notacja_polska">https://pl.wikipedia.org/wiki/Odwrotna_notacja_polska
+)</a>.</p>
+
+<p>Program powinien składać się z jednego procesu <code>ToONP</code>
+wywoływanego z jednym argumentem napisowym zawierającym wyrażenie, które
+należy skonwertować oraz, o ile argument jest napisem niepustym, z pewnej
+liczby procesów <code>W.</code> Każdy z procesów <code>W</code>(i) wykonuje
+jeden krok konwersji napisu i, jeśli nie był to krok ostatni, przekazuje
+częściowe wyniki następnemu procesowi <code>W(i+1).</code></p>
+
+<p><code></code> </p>
+
+<h3>DZIAŁANIE I KOMUNIKACJA</h3>
+
+<p>Każdy z procesów <code>W(i)</code> wykonuje jeden krok konwersji, to
+znaczy pobiera z napisu wejściowego jeden początkowy element (liczbę,
+stałą, nawias albo operator) i wykonuje odpowiednie operacje na stosie i/lub
+napisie wynikowym.</p>
+
+<p>Program <code>ToONP</code> wywoływany jest z jednym argumentem napisowym
+zawierającym wyrażenie, które ma zostać poddane konwersji. Jeśli argument
+ten nie jest napisem pustym, program ToONP tworzy proces <code>W</code>(1),
+któremu przekazuje przez łacze nienazwane (pipe) trzy napisy reprezentujące
+odpowiednio: całe wyrażenie do konwersji, stos (początkowo
+pusty) oraz dotychczas uzyskany wynik częściowy (również początkowo
+pusty).</p>
+
+<p>Kolejne procesy <code>W(i)</code> pobierają od procesu <code>W(i-1)</code> 
+trzy napisy reprezentujące: pozostałą do zanalizowania część napisu
+wejściowego do konwersji, całą aktualną zawartość stosu oraz cały
+dotychczas uzyskany wynik.</p>
+
+<p>Po wykonaniu kolejnego kroku obliczeń, o ile napis wejściowy nie stał
+się pusty, tworzą kolejny proces <code>W(i+1)</code>, któremu przekazują
+napisy reprezentujące odpowiednio zmodyfikowane dane wejściowe, stos i
+uzyskany wynik.</p>
+
+<p>O ile proces <code>W(k)</code> wykonał ostatni krok obliczeń (napis
+wejściowy stał się pusty) przekazuje procesowi <code>W(k-1)</code> napis
+reprezentujący wynik i kończy pracę. O ile proces <code>W(i)</code> nie był
+procesem kończącym obliczenia, odbiera od procesu <code>W(i+1)</code> wynik
+obliczeń, przekazuje je do procesu <code>W(i-1)</code>(<code>W(1)</code>
+przekazuje je do <code>ToONP</code>) i kończy pracę.</p>
+
+<p>Proces <code>ToONP</code> wypisuje uzyskany wynik na standardowe wyjście i
+kończy pracę.</p>
+
+<p>Proces <code>ToONP</code> komunikuje się wyłacznie z procesem
+<code>W(1)</code>. Każdy z procesów <code>W(i)</code>, z wyjątkiem pierwszego
+i ostatniego, komunikuje się wyłącznie z procesami <code>W(i-1)</code> i
+<code>W(i+1)</code>. Proces <code>W(1)</code> komunikuje się z procesem
+<code>ToONP</code> oraz ewentualnie z procesem <code>W(2)</code> a proces
+<code>W(n)</code> wyłącznie z <code>W(n-1)</code>.</p>
+
+<p><strong>Do komunikacji miedzy procesami wykorzystywane są wyłącznie
+jednokierunkowe łącza nienazwane (<code>pipe</code>). </strong></p>
+
+<p><strong>Nie należy zakładać nienaturalnych ograniczeń na długość
+napisów, wielkośc buforów itp. </strong></p>
+
+<h3>POSTAĆ DANYCH WEJŚCIOWYCH I WYNIKU</h3>
+
+<p>Jako dane do programu przekazywany jest napis reprezentujący wyrażenie
+arytmetyczne składajace się z następujących elementów:</p>
+<ul>
+  <li>liczb całkowitych, </li>
+  <li>stałych reprezentowanych małymi literami alfabetu angielskiego, </li>
+  <li>nawiasów okrągłych, </li>
+  <li>operatorów dodawania (+), odejmowania (-), </li>
+  <li>operatorów mnożenia (*), dzielenia (/) </li>
+  <li>potęgowania (^). </li>
+</ul>
+
+<p></p>
+
+<p>W napisie reprezentujacym wyrażenie poszczególne elementy wyrażenia
+oddzielone są od siebie co najmniej jedną spacją. </p>
+
+<p>Wynik wypisywany przez program powinien mieć postać napisu
+reprezentującego wyrażenie skonwertowane do postaci ONP. W napisie tym
+poszczególne elementy wyrażenia powinny być oddzielone dokładnie jedną
+spacją.</p>
+
+<p><strong>Można założyć, że wyrażenie arytmetyczne ma poprawną
+budowę.</strong></p>
+
+<p></p>
+
+<h3>POZOSTAŁE INFORMACJE</h3>
+
+<p>Rozwiązania (tylko Makefile i pliki źródłowe) należy nadsyłać za
+pomoca skryptu submit na adres: solab@mimuw.edu.pl </p>
+
+<p>Rozwiązanie musi kompilować się i działać pod Linuksem na serwerze
+students w laboratorium wydziałowym.</p>
+
+<p>W komentarzu w kodzie żródłowym należy umieścić dane autora (imię,
+nazwisko, numer albumu).</p>
+
+<p>Kod źródłowy powinien być w rozsądny sposób skomentowany.</p>
+
+<p>Wszystkie procesy są zobowiązane do oczekiwania na zakończenie swoich
+potomków.</p>
+
+<p>Należy bezwzględnie zamykać nieużywane deskryptory plików.</p>
+
+<p>Należy sprawdzać poprawność wykonania funkcji systemowych.</p>
+
+<p>Ostateczny termin nadsyłania rozwiązań to: <strong>16 listopada 2015, godz. 23:59</strong>.</p>
+
+W przypadku wątpliwości można zadać pytanie autorowi zadania <a
+href="mailto:kszafran@mimuw.edu.pl">K. Szafranowi.</a> Przed zadaniem pytania
+warto sprawdzić, czy odpowiedź na nie nie pojawiła się na liście często
+zadawanych pytań. </body>
+</html>
